@@ -5,7 +5,7 @@ export function Header() {
   return (
     <header className="flex items-center p-4 shadow">
       <Link to="/home">
-        <img src="/logo192.png" alt="Climatch Logo" className="h-8 w-8 mr-2" />
+        <img src="/climatch_logo.png" alt="Climatch Logo" className="h-8 w-8 mr-2" />
       </Link>
       <h1 className="text-2xl font-semibold">Climatch</h1>
     </header>
