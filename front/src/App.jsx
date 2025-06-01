@@ -5,6 +5,7 @@ import { SignupPage } from './pages/SignupPage';
 import { HomePage } from './pages/HomePage';
 import { OutfitViewPage } from './pages/OutfitViewPage';
 import { OutfitUploadPage } from './pages/OutfitUploadPage';
+import Weather from './pages/Weather';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/view" element={<OutfitViewPage />} />
         <Route path="/upload" element={<OutfitUploadPage />} />
+        <Route path="/weather" element={<Weather />} />
         <Route path="/*" element={<LoginPage />} />
       </Routes>
     </Router>
