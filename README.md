@@ -35,3 +35,46 @@ Dropbox의 오픈소스 보안 라이브러리 [zxcvbn.js](https://github.com/dr
 - 비밀번호 강도에 따라 점수(0~4) 및 피드백 제공
 - 연속된 문자, 사전 단어, 개인 정보 유사성 등 복합 요소 분석
 - 안전하지 않은 비밀번호는 경고 메시지로 알려줍니다
+
+## 💻 설치 및 실행 방법
+
+### 필수 요구사항
+
+- Node.js 18 이상
+- MariaDB 10.6 이상
+
+### 설치 방법
+
+1. 저장소를 클론합니다.
+   ```bash
+   git clone https://github.com/your-username/climatch.git
+   cd climatch
+   ```
+
+2. 의존성 패키지를 설치합니다.
+   ```bash
+   npm run install:all
+   ```
+
+3. MariaDB 데이터베이스를 설정합니다.
+   - MariaDB가 실행 중인지 확인합니다.
+   - `climatch` 데이터베이스는 서버 실행 시 자동으로 생성됩니다.
+
+4. 백엔드 환경 설정을 위해 `back/.env` 파일을 생성합니다.
+   ```
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_USER=root
+   DB_PASSWORD=YOUR_DB_PASSWORD
+   DB_NAME=climatch
+   JWT_SECRET=YOUR_SECRET_KEY
+   ```
+
+## 📋 데이터베이스 구조
+
+프로젝트는 다음과 같은 테이블로 구성되어 있습니다:
+
+- **climatch_user**: 사용자 정보 저장
+- **climatch_session**: 로그인 세션 관리
+- **climatch_weather_history**: 날씨 데이터 기록
+- **climatch_outfit**: 사용자가 등록한 의상 정보

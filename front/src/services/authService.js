@@ -3,56 +3,72 @@
 // Note: In a production app, NEVER do password hashing in the frontend.
 // This is purely for demonstration purposes.
 
-// Simulate bcrypt hash function (this is NOT real bcrypt!)
-const simulateBcryptHash = async (password, saltRounds = 10) => {
-  // This is a very simplified hash function for demo only!
-  // It does NOT provide any security and should NEVER be used in production.
-  // In a real app, the backend would handle password hashing with bcrypt.
-  
-  // Create a simple "salt"
+// API 기본 URL
+const API_BASE_URL = 'http://localhost:3000/api';
+
+// Simulate bcrypt hash function (간단한 해시 시뮬레이션)
+const simulateBcryptHash = async (password) => {
   const salt = Array.from({ length: 16 }, () => 
     Math.floor(Math.random() * 36).toString(36)
   ).join('');
   
-  // Combine password and salt, then convert to base64
   const combined = password + salt;
-  const hash = btoa(combined); // Simplified "hash" using base64 encoding
+  const hash = btoa(combined);
   
-  // Format to look like a bcrypt hash (for visual purposes only)
-  return `$2b$${saltRounds}$${salt}${hash}`;
+  return `$2b$10$${salt}${hash}`;
 };
 
-// Simulate bcrypt compare function
+// Simulate bcrypt compare function (간단한 비교 시뮬레이션)
 const simulateBcryptCompare = async (password, hash) => {
-  // Extract the salt from the hash (this is a simplified approach)
   const parts = hash.split('$');
   if (parts.length !== 4) return false;
   
   const salt = parts[3].substring(0, 16);
   const storedHash = parts[3].substring(16);
   
-  // Combine password and extracted salt, then convert to base64
   const combined = password + salt;
   const compareHash = btoa(combined);
   
-  // Compare the computed hash with the stored hash
   return compareHash === storedHash;
 };
 
 // Register a new user
 export const registerUser = async (userData) => {
   try {
-    // In a real app, we would send this data to a backend API
+    // 백엔드 API 호출을 위한 데이터 변환
+    const backendUserData = {
+      username: userData.userId,
+      password: userData.password,
+      birth_date: userData.birthDate,
+      age: userData.age,
+      location: userData.location,
+    };
+    
+    // 백엔드 API 호출 시도
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(backendUserData),
+        signal: AbortSignal.timeout(3000)
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('서버에 회원가입 성공:', data);
+        return { success: true, user: data.user };
+      }
+    } catch (apiError) {
+      console.error('API 호출 실패, localStorage에 저장:', apiError);
+    }
+    
+    // 백엔드 API 호출 실패 시 localStorage에 저장 (백업 방식)
     const { password, ...otherData } = userData;
-    
-    // Simulate bcrypt hashing
     const hashedPassword = await simulateBcryptHash(password);
-    
-    // Store in localStorage for demo purposes
-    // In a real app, this would be stored in a database on the server
     const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
     
-    // Check if user already exists
     if (existingUsers.some(u => u.userId === userData.userId)) {
       throw new Error('이미 존재하는 아이디입니다.');
     }
@@ -76,9 +92,27 @@ export const registerUser = async (userData) => {
 // Login user
 export const loginUser = async (userId, password) => {
   try {
-    // In a real app, we would send this data to a backend API
-    
-    // Get users from localStorage for demo purposes
+    // 백엔드 API 호출 시도
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: userId, password }),
+        signal: AbortSignal.timeout(3000)
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        return { success: true, user: data.user, token: data.token };
+      }
+    } catch (apiError) {
+      console.error('API 호출 실패, localStorage에서 사용자 확인:', apiError);
+    }
+
+    // 백엔드 API 호출 실패 시 localStorage에서 확인 (백업 방식)
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const user = users.find(u => u.userId === userId);
     
@@ -86,24 +120,16 @@ export const loginUser = async (userId, password) => {
       throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
     }
     
-    // Compare passwords
     const isPasswordValid = await simulateBcryptCompare(password, user.passwordHash);
     
     if (!isPasswordValid) {
       throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
     }
     
-    // Generate a dummy token
     const token = btoa(`${userId}:${Date.now()}`);
-    
-    // Extract user data without password hash
     const { passwordHash, ...userData } = user;
     
-    return { 
-      success: true, 
-      user: userData, 
-      token 
-    };
+    return { success: true, user: userData, token };
   } catch (error) {
     console.error('Login error:', error);
     throw error;

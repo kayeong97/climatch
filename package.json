@@ -1,0 +1,24 @@
+{
+  "name": "climatch",
+  "version": "1.0.0",
+  "description": "날씨 기반 의상 추천 서비스",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run start:back\" \"npm run start:front\"",
+    "start:back": "cd back && node server.js",
+    "start:front": "cd front && npm run dev",
+    "install:all": "npm install && cd back && npm install && cd ../front && npm install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "weather",
+    "fashion",
+    "outfit",
+    "recommendation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+} 
