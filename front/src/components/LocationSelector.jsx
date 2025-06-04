@@ -1,57 +1,84 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+// 임시 도시 데이터
+const MOCK_CITIES = [
+  { code: 'seoul', name: '서울' },
+  { code: 'busan', name: '부산' },
+  { code: 'incheon', name: '인천' },
+  { code: 'daegu', name: '대구' },
+  { code: 'daejeon', name: '대전' },
+  { code: 'gwangju', name: '광주' },
+  { code: 'ulsan', name: '울산' },
+  { code: 'jeju', name: '제주' }
+];
+
+// 임시 구/군 데이터
+const MOCK_DISTRICTS = {
+  seoul: [
+    { code: 'gangnam', name: '강남구' },
+    { code: 'gangdong', name: '강동구' },
+    { code: 'gangbuk', name: '강북구' },
+    { code: 'gangseo', name: '강서구' },
+    { code: 'gwanak', name: '관악구' },
+    { code: 'mapo', name: '마포구' },
+    { code: 'jongno', name: '종로구' }
+  ],
+  busan: [
+    { code: 'haeundae', name: '해운대구' },
+    { code: 'suyeong', name: '수영구' },
+    { code: 'geumjeong', name: '금정구' },
+    { code: 'yeonje', name: '연제구' }
+  ],
+  incheon: [
+    { code: 'namdong', name: '남동구' },
+    { code: 'yeonsu', name: '연수구' },
+    { code: 'bupyeong', name: '부평구' }
+  ],
+  daegu: [
+    { code: 'suseong', name: '수성구' },
+    { code: 'dalseo', name: '달서구' },
+    { code: 'dalseong', name: '달성군' }
+  ],
+  daejeon: [
+    { code: 'yuseong', name: '유성구' },
+    { code: 'seo', name: '서구' },
+    { code: 'jung', name: '중구' }
+  ],
+  gwangju: [
+    { code: 'seo', name: '서구' },
+    { code: 'nam', name: '남구' },
+    { code: 'buk', name: '북구' }
+  ],
+  ulsan: [
+    { code: 'nam', name: '남구' },
+    { code: 'dong', name: '동구' },
+    { code: 'buk', name: '북구' }
+  ],
+  jeju: [
+    { code: 'jeju', name: '제주시' },
+    { code: 'seogwipo', name: '서귀포시' }
+  ]
+};
 
 const LocationSelector = ({ onLocationSelect }) => {
-  const [cities, setCities] = useState([]);
+  const [cities] = useState(MOCK_CITIES);
   const [districts, setDistricts] = useState([]);
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  // 도시 목록 불러오기
-  useEffect(() => {
-    const fetchCities = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(`${API_BASE_URL}/api/locations/cities`);
-        setCities(response.data.cities);
-        setError(null);
-      } catch (err) {
-        console.error('도시 목록 로딩 실패:', err);
-        setError('도시 목록을 불러오는데 실패했습니다.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCities();
-  }, []);
-
-  // 선택된 도시에 따라 구/군 목록 불러오기
+  // 선택된 도시에 따라 구/군 목록 설정
   useEffect(() => {
     if (!selectedCity) {
       setDistricts([]);
       return;
     }
 
-    const fetchDistricts = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(`${API_BASE_URL}/api/locations/districts/${selectedCity}`);
-        setDistricts(response.data.districts);
-        setError(null);
-      } catch (err) {
-        console.error('구/군 목록 로딩 실패:', err);
-        setError('구/군 목록을 불러오는데 실패했습니다.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDistricts();
+    setLoading(true);
+    // 임시 데이터에서 구/군 목록 가져오기
+    const districtData = MOCK_DISTRICTS[selectedCity] || [];
+    setDistricts(districtData);
+    setLoading(false);
   }, [selectedCity]);
 
   // 도시 선택 핸들러
@@ -61,7 +88,12 @@ const LocationSelector = ({ onLocationSelect }) => {
     setSelectedDistrict('');
     
     // 부모 컴포넌트에 위치 정보 전달
-    onLocationSelect({ city: cityCode, district: null });
+    if (cityCode) {
+      const cityName = cities.find(city => city.code === cityCode)?.name || '';
+      onLocationSelect(cityName);
+    } else {
+      onLocationSelect(null);
+    }
   };
 
   // 구/군 선택 핸들러
@@ -69,13 +101,16 @@ const LocationSelector = ({ onLocationSelect }) => {
     const districtCode = e.target.value;
     setSelectedDistrict(districtCode);
     
-    // 부모 컴포넌트에 위치 정보 전달
-    onLocationSelect({ city: selectedCity, district: districtCode });
+    if (districtCode) {
+      const cityName = cities.find(city => city.code === selectedCity)?.name || '';
+      const districtName = districts.find(district => district.code === districtCode)?.name || '';
+      // 부모 컴포넌트에 위치 정보 전달 (도시명 + 구/군명)
+      onLocationSelect(`${cityName} ${districtName}`);
+    } else {
+      const cityName = cities.find(city => city.code === selectedCity)?.name || '';
+      onLocationSelect(cityName);
+    }
   };
-
-  if (error) {
-    return <div className="text-red-500 text-sm mt-2">{error}</div>;
-  }
 
   return (
     <div className="location-selector">

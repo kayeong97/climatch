@@ -2,10 +2,10 @@
   "name": "climatch-backend",
   "version": "1.0.0",
   "description": "Backend for Climatch - Weather-based outfit recommendation app",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
     "init-db": "node utils/initDb.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,7 +18,8 @@
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.6.5",
     "uuid": "^9.0.1",
-    "zxcvbn": "^4.4.2"
+    "zxcvbn": "^4.4.2",
+    "cors": "^2.8.5"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
