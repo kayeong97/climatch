@@ -23,17 +23,6 @@ const createOutfit = async (outfitData) => {
   }
 };
 
-// ID로 의상 조회
-const getOutfitById = async (id) => {
-  try {
-    const [rows] = await pool.execute('SELECT * FROM climatch_outfit WHERE id = ?', [id]);
-    return rows[0];
-  } catch (error) {
-    console.error('의상 조회 오류:', error);
-    throw error;
-  }
-};
-
 // 사용자 ID로 의상 목록 조회
 const getOutfitsByUserId = async (userId) => {
   try {
@@ -109,6 +98,20 @@ const deleteOutfit = async (id) => {
     return { success: true };
   } catch (error) {
     console.error('의상 삭제 오류:', error);
+    throw error;
+  }
+};
+
+// 의상 ID로 의상 조회
+const getOutfitById = async (id) => {
+  try {
+    const [rows] = await pool.execute(
+      'SELECT * FROM climatch_outfit WHERE id = ?',
+      [id]
+    );
+    return rows[0];
+  } catch (error) {
+    console.error('의상 조회 오류:', error);
     throw error;
   }
 };

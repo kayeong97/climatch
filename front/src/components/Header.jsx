@@ -46,9 +46,6 @@ export function Header() {
               <Link to="/home" className={`${getNavLinkClass('/home')} text-lg`}>
                 홈
               </Link>
-              <Link to="/weather" className={`${getNavLinkClass('/weather')} text-lg`}>
-                날씨
-              </Link>
               <Link to="/view" className={`${getNavLinkClass('/view')} text-lg`}>
                 코디 보기
               </Link>
@@ -114,13 +111,6 @@ export function Header() {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     홈
-                  </Link>
-                  <Link 
-                    to="/weather" 
-                    className={`${getNavLinkClass('/weather')} px-2 py-2 rounded-md text-lg`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    날씨
                   </Link>
                   <Link 
                     to="/view" 

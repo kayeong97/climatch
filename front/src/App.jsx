@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Layout from './components/Layout';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
-import { HomePage } from './pages/HomePage';
 import { OutfitViewPage } from './pages/OutfitViewPage';
 import { OutfitUploadPage } from './pages/OutfitUploadPage';
 import Weather from './pages/Weather';
@@ -22,11 +21,10 @@ export default function App() {
           {/* 인증이 필요한 페이지 */}
           <Route element={<PrivateRoute />}>
             <Route element={<Layout />}>
-              <Route path="/home" element={<HomePage />} />
+              <Route path="/home" element={<Weather />} />
+              <Route path="/" element={<Weather />} />
               <Route path="/view" element={<OutfitViewPage />} />
               <Route path="/upload" element={<OutfitUploadPage />} />
-              <Route path="/weather" element={<Weather />} />
-              <Route path="/" element={<Navigate to="/home" replace />} />
             </Route>
           </Route>
           

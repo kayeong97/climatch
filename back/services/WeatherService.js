@@ -1,17 +1,19 @@
 // services/WeatherService.js
 // 외부 날씨 API 연동 및 데이터 파싱
 const axios = require('axios');
+const WeatherData = require('../models/WeatherData');
+require('dotenv').config();
 
 class WeatherService {
   constructor(apiKey) {
-    this.apiKey = apiKey;
+    this.apiKey = apiKey || process.env.WEATHER_API_KEY;
     this.baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
     this.forecastUrl = 'https://api.openweathermap.org/data/2.5/forecast';
     this.lang = 'kr';
   }
 
-  // 위치 기반 실시간 날씨 조회
-  async fetchWeatherByLocation(location) {
+  // 위치 기반 현재 날씨 조회
+  async getCurrentWeather(location) {
     try {
       const resp = await axios.get(this.baseUrl, {
         params: { 
@@ -21,7 +23,14 @@ class WeatherService {
           lang: this.lang
         }
       });
-      return this.parseWeatherData(resp.data);
+      
+      // 날씨 정보 파싱 및 WeatherData 객체 생성
+      const weather = resp.data.weather[0];
+      return new WeatherData({
+        temperature: resp.data.main.temp,
+        condition: weather.description,
+        location: resp.data.name
+      });
     } catch (error) {
       console.error('날씨 API 호출 오류:', error.message);
       throw new Error('날씨 정보를 가져오는데 실패했습니다.');

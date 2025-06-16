@@ -136,7 +136,8 @@ export const loginUser = async (userId, password) => {
   }
 };
 
-export default {
+const exported = {
   registerUser,
   loginUser
-}; 
+};
+export default exported; 

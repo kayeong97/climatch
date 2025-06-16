@@ -1,14 +1,15 @@
 // models/Outfit.js
 // 코디 모델 정의
 class Outfit {
-  constructor({ id, topColor, style, imageUrl, uploadDate, weatherData, userAge }) {
+  constructor({ id, topColor, style, imageUrl, weatherTemp, weatherCondition, userAge, uploadedAt }) {
     this.id = id;
     this.topColor = topColor;
     this.style = style;
     this.imageUrl = imageUrl;
-    this.uploadDate = new Date(uploadDate);
-    this.weatherData = weatherData;
+    this.weatherTemp = weatherTemp;
+    this.weatherCondition = weatherCondition;
     this.userAge = userAge;
+    this.uploadedAt = new Date(uploadedAt);
   }
 
   // 코디 요약 정보 반환
@@ -18,9 +19,10 @@ class Outfit {
       topColor: this.topColor,
       style: this.style,
       imageUrl: this.imageUrl,
-      date: this.uploadDate.toISOString(),
-      weather: this.weatherData,
+      weatherTemp: this.weatherTemp,
+      weatherCondition: this.weatherCondition,
       age: this.userAge,
+      date: this.uploadedAt.toISOString()
     };
   }
 }

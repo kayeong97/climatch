@@ -1,5 +1,35 @@
 const outfitModel = require('../models/outfitModel');
 const weatherHistoryModel = require('../models/weatherHistoryModel');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configure multer for file upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, '../../uploads');
+    // Create uploads directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    // Accept images only
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+      return cb(new Error('Only image files are allowed!'), false);
+    }
+    cb(null, true);
+  }
+}).single('image');
 
 // 새로운 의상 등록
 const createOutfit = async (req, res) => {
@@ -22,7 +52,7 @@ const createOutfit = async (req, res) => {
       weather_temp,
       weather_condition,
       user_age,
-      is_recommended: false // 기본값
+      is_recommended: false 
     });
 
     res.status(201).json({

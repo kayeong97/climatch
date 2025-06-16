@@ -2,36 +2,47 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getWeatherIcon } from '../utils/weatherIcons';
+import axios from 'axios';
 
 export function HomePage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [weather, setWeather] = useState({ 
-    temperature: 22, 
-    description: '맑음',
-    icon: getWeatherIcon('맑음')
+    temperature: null, 
+    description: '',
+    icon: ''
   });
+  const [userLocation, setUserLocation] = useState(null);
 
-  // Simulate fetching weather data
+  // Fetch user's location and weather data
   useEffect(() => {
-    // In a real app, this would be an API call to a weather service
-    const weatherData = { 
-      temperature: 22, 
-      description: '맑음',
-      icon: getWeatherIcon('맑음')
+    const fetchUserData = async () => {
+      try {
+        // Get user's location from their profile
+        const userResponse = await axios.get('/api/users/profile');
+        const { city, district } = userResponse.data;
+        setUserLocation({ city, district });
+
+        // Get weather data for user's location
+        const weatherResponse = await axios.get(`/api/weather?city=${city}&district=${district}`);
+        setWeather({
+          temperature: weatherResponse.data.temperature,
+          description: weatherResponse.data.description,
+          icon: getWeatherIcon(weatherResponse.data.description)
+        });
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
     };
-    setWeather(weatherData);
-  }, []);
+
+    if (currentUser) {
+      fetchUserData();
+    }
+  }, [currentUser]);
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <div className="flex justify-end p-2 text-sm space-x-2">
-        <button 
-          onClick={() => navigate('/weather')} 
-          className="text-gray-600 hover:underline"
-        >
-          다른 지역 날씨 보기
-        </button>
         <button 
           onClick={() => navigate('/view')} 
           className="text-gray-600 hover:underline"
@@ -42,13 +53,14 @@ export function HomePage() {
       
       <div className="flex-grow flex flex-col items-center justify-center p-6">
         <div className="flex flex-col items-center mb-8">
-          <div className="text-8xl mb-2">{weather.icon}</div>
-          <div className="text-5xl font-light">{weather.temperature}°C</div>
+          {weather.icon && <div className="text-8xl mb-2">{weather.icon}</div>}
+          {weather.temperature && <div className="text-5xl font-light">{weather.temperature}°C</div>}
         </div>
         
         <p className="text-xl text-center mt-4">
-          {currentUser?.name || currentUser?.id}님!<br />
-          오늘 날씨엔 셔츠 어때요?
+          {currentUser?.username}님!<br />
+          {weather.temperature && userLocation && 
+            `오늘 ${userLocation.city} ${userLocation.district}의 날씨는 ${weather.temperature}°C로 ${weather.description}입니다.`}
         </p>
         
         <div className="mt-8 flex space-x-3">

@@ -45,18 +45,6 @@ router.get('/recommend', async (req, res) => {
 });
 
 // 사용자 의상 등록 API (인증 필요)
-router.post('/', authMiddleware, async (req, res) => {
-  try {
-    // 실제 구현에서는 DB에 저장
-    res.status(201).json({ 
-      success: true, 
-      message: '의상이 등록되었습니다.',
-      outfit: req.body 
-    });
-  } catch (error) {
-    console.error('의상 등록 오류:', error);
-    res.status(500).json({ error: '서버 오류가 발생했습니다.' });
-  }
-});
+router.post('/', authMiddleware, outfitController.createOutfit);
 
 module.exports = router; 

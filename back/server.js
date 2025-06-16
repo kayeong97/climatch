@@ -1,14 +1,16 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { testConnection } = require('./utils/database');
-const userRoutes = require('./routes/userRoutes');
-const outfitRoutes = require('./routes/outfitRoutes');
-const weatherRoutes = require('./routes/weatherRoutes');
-const sessionRoutes = require('./routes/sessionRoutes');
+const { testConnection } = require('./utils/database.js');
+const userRoutes = require('./routes/userRoutes.js');
+const outfitRoutes = require('./routes/outfitRoutes.js');
+const weatherRoutes = require('./routes/weatherRoutes.js');
+const sessionRoutes = require('./routes/sessionRoutes.js');
+const recommendationRoutes = require('./routes/recommendationRoutes.js');
 
 // Express 앱 생성
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // 미들웨어 설정
 app.use(cors());
@@ -31,6 +33,7 @@ app.use(express.urlencoded({ extended: true }));
     app.use('/api/outfits', outfitRoutes);
     app.use('/api/weather', weatherRoutes);
     app.use('/api/sessions', sessionRoutes);
+    app.use('/api', recommendationRoutes);
 
     // 404 에러 처리
     app.use((req, res) => {
@@ -51,6 +54,4 @@ app.use(express.urlencoded({ extended: true }));
     console.error('데이터베이스 연결 실패. 서버를 종료합니다.');
     process.exit(1);
   }
-})();
-
-module.exports = app; 
+})(); 

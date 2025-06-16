@@ -9,11 +9,17 @@
 
 # misc
 .DS_Store
+# .env 파일은 보안상의 이유로 다시 추가
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+/back/.env
+
+# database
+# /back/utils/database.js
+# /back/config/database.config.js
 
 # logs
 npm-debug.log*

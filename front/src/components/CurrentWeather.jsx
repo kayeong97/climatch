@@ -1,53 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { getWeatherIcon } from '../utils/weatherIcons';
+import axios from 'axios';
 
-// 임시 날씨 데이터 생성 함수
-const generateMockWeatherData = (location) => {
-  // 현재 날짜 및 시간
-  const now = new Date();
-  
-  // 랜덤 온도 (계절에 따라 다르게 설정)
-  const month = now.getMonth(); // 0-11
-  let tempMin, tempMax;
-  
-  if (month >= 11 || month <= 1) { // 겨울 (12-2월)
-    tempMin = -5;
-    tempMax = 10;
-  } else if (month >= 2 && month <= 4) { // 봄 (3-5월)
-    tempMin = 8;
-    tempMax = 25;
-  } else if (month >= 5 && month <= 7) { // 여름 (6-8월)
-    tempMin = 20;
-    tempMax = 35;
-  } else { // 가을 (9-11월)
-    tempMin = 10;
-    tempMax = 25;
-  }
-  
-  const temp = Math.round((Math.random() * (tempMax - tempMin) + tempMin) * 10) / 10;
-  
-  // 날씨 상태 랜덤 선택
-  const weatherConditions = ['맑음', '구름 조금', '구름 많음', '흐림', '비', '눈', '안개'];
-  const weatherIndex = Math.floor(Math.random() * weatherConditions.length);
-  const condition = weatherConditions[weatherIndex];
-  
-  return {
-    id: 1,
-    location: location,
-    weather_temp: temp,
-    weather_condition: condition,
-    fetched_at: now.toISOString()
-  };
-};
-
-const CurrentWeather = ({ location }) => {
+const CurrentWeather = ({ location, onWeatherChange }) => {
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [recommendation, setRecommendation] = useState('');
+  const [recLoading, setRecLoading] = useState(false);
 
   useEffect(() => {
     if (!location) {
       setWeather(null);
+      if (onWeatherChange) onWeatherChange(null);
+      setRecommendation('');
       return;
     }
 
@@ -70,7 +36,22 @@ const CurrentWeather = ({ location }) => {
         icon: getWeatherIcon(weatherData.condition)
       });
       setLoading(false);
+      if (onWeatherChange) onWeatherChange(weatherData);
     }, 800);
+  }, [location, onWeatherChange]);
+
+  useEffect(() => {
+    if (!location) return;
+    setRecLoading(true);
+    setRecommendation('');
+    axios.get('/api/recommendation')
+      .then(res => {
+        setRecommendation(res.data.recommendation?.text || '오늘은 가벼운 옷차림을 추천합니다!');
+      })
+      .catch(() => {
+        setRecommendation('오늘은 가벼운 옷차림을 추천합니다!');
+      })
+      .finally(() => setRecLoading(false));
   }, [location]);
 
   if (!location) {
@@ -137,6 +118,13 @@ const CurrentWeather = ({ location }) => {
             <p className="text-xl text-gray-800">{weather.windSpeed} m/s</p>
           </div>
         </div>
+      </div>
+      <div className="mt-8 bg-yellow-50 p-4 rounded-lg text-center">
+        {recLoading ? (
+          <span className="text-gray-400">추천을 불러오는 중...</span>
+        ) : (
+          <span className="text-lg text-yellow-700 font-semibold">{recommendation}</span>
+        )}
       </div>
     </div>
   );

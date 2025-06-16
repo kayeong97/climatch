@@ -57,7 +57,7 @@ const testConnection = async () => {
         id INT AUTO_INCREMENT PRIMARY KEY,
         location VARCHAR(50) NOT NULL,
         temperature FLOAT NOT NULL,
-        condition VARCHAR(50) NOT NULL,
+        \`condition\` VARCHAR(50) NOT NULL,
         humidity INT,
         wind_speed FLOAT,
         recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

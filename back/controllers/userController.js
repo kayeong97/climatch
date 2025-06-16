@@ -2,52 +2,75 @@ const userModel = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { createSession, deleteSession } = require('../models/sessionModel');
+const PasswordChecker = require('../utils/PasswordChecker');
+const zxcvbn = require('zxcvbn');
+const crypto = require('crypto');
 
-// JWT 비밀키 (실제로는 환경 변수에서 가져오는 것이 좋습니다)
+// JWT 비밀키
 const JWT_SECRET = process.env.JWT_SECRET || 'climatch-secret-key';
 const JWT_EXPIRES_IN = '1h';
 const REFRESH_TOKEN_EXPIRES_IN = 30 * 24 * 60 * 60 * 1000; // 30일
 
+// Generate a random password
+const generateRandomPassword = (length = 12) => {
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += charset.charAt(crypto.randomInt(0, charset.length));
+  }
+  return password;
+};
+
+// Validate password strength
+const validatePassword = (password) => {
+  const result = zxcvbn(password);
+  return {
+    isValid: result.score >= 3,
+    score: result.score,
+    feedback: result.feedback
+  };
+};
+
 // 사용자 회원가입
 const register = async (req, res) => {
   try {
-    const { username, password, gender, birth_date, age, location } = req.body;
-
-    // 필수 필드 확인
-    if (!username || !password) {
-      return res.status(400).json({ error: '사용자명과 비밀번호는 필수입니다.' });
-    }
-
-    // 사용자명 중복 확인
-    const existingUser = await userModel.getUserByUsername(username);
-    if (existingUser) {
-      return res.status(409).json({ error: '이미 사용 중인 사용자명입니다.' });
-    }
-
-    // 비밀번호 해시화
-    const saltRounds = 10;
-    const password_hash = await bcrypt.hash(password, saltRounds);
-
-    // 사용자 생성
-    const newUser = await userModel.createUser({
-      username,
-      password_hash,
-      gender,
-      birth_date,
-      age,
-      location
-    });
-
-    // 민감 정보 제외하고 응답
-    const { password_hash: _, ...userWithoutPassword } = newUser;
+    const { username, email } = req.body;
     
-    res.status(201).json({
-      message: '회원가입이 완료되었습니다.',
-      user: userWithoutPassword
+    // Validate username (lowercase English letters only)
+    if (!/^[a-z]+$/.test(username)) {
+      return res.status(400).json({ error: '아이디는 소문자 영어만 가능합니다.' });
+    }
+
+    // Generate password
+    const password = generatePassword();
+    const validation = validatePassword(password);
+    
+    if (!validation.isValid) {
+      return res.status(400).json({ 
+        error: 'Generated password is not strong enough',
+        feedback: validation.feedback
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Save user to database
+    const query = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
+    connection.query(query, [username, email, hashedPassword], (error, results) => {
+      if (error) {
+        console.error('Error registering user:', error);
+        return res.status(500).json({ error: 'Error registering user' });
+      }
+      
+      // Return the generated password to the user
+      res.status(201).json({ 
+        message: 'User registered successfully',
+        password: password // In production, this should be sent via email
+      });
     });
   } catch (error) {
-    console.error('회원가입 오류:', error);
-    res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+    console.error('Error in register:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 

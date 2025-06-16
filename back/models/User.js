@@ -4,8 +4,9 @@ const { pool } = require('../utils/database');
 const bcrypt = require('bcrypt');
 
 class User {
-  constructor({ id, passwordHash, gender, birthDate, location }) {
+  constructor({ id, username, passwordHash, gender, birthDate, location }) {
     this.id = id;
+    this.username = username;
     this.passwordHash = passwordHash;
     this.gender = gender;
     this.birthDate = new Date(birthDate);
@@ -41,17 +42,6 @@ class User {
       return { id: result.insertId, username, email };
     } catch (error) {
       console.error('사용자 생성 오류:', error);
-      throw error;
-    }
-  }
-  
-  // 이메일로 사용자 찾기
-  static async findByEmail(email) {
-    try {
-      const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-      return rows[0];
-    } catch (error) {
-      console.error('사용자 조회 오류:', error);
       throw error;
     }
   }
