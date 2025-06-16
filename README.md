@@ -67,7 +67,7 @@ Dropbox의 오픈소스 보안 라이브러리 [zxcvbn.js](https://github.com/dr
    DB_USER=root
    DB_PASSWORD=YOUR_DB_PASSWORD
    DB_NAME=climatch
-   JWT_SECRET=YOUR_SECRET_KEY
+   WEATHER_API_KEY=YOUR_WEATHER_API
    ```
 
 ## 📋 데이터베이스 구조
